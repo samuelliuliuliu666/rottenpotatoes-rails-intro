@@ -16,16 +16,21 @@ class MoviesController < ApplicationController
     else
       @ratings_to_show = @all_ratings
     end
-    if params[:sort]
-      @movies = Movie.with_ratings(@ratings_to_show).order(params[:sort])
-      session[:sort] = params[:sort]
-    elsif session[:sort]
-      @movies = Movie.with_ratings(@ratings_to_show).order(session[:sort])
+    if params[:sort_by_col]
+      @movies = Movie.with_ratings(@ratings_to_show).order(params[:sort_by_col])
+      session[:sort_by_col] = params[:sort_by_col]
+      if session[:sort_by_col] == 'title'
+        @title_header = 'hilite bg-warning'
+      elsif session[:sort_by_col] == 'release_date'
+        @release_header = 'hilite bg-warning'
+      end
+    elsif session[:sort_by_col]
+      @movies = Movie.with_ratings(@ratings_to_show).order(session[:sort_by_col])
     else
       @movies = Movie.with_ratings(@ratings_to_show)
     end
-    if params[:ratings] != session[:ratings] or params[:sort] != session[:sort]
-      redirect_to movies_path ratings: session[:ratings], sort: session[:sort] 
+    if params[:ratings] != session[:ratings] or params[:sort_by_col] != session[:sort_by_col]
+      redirect_to movies_path(:ratings=>session[:ratings],:sort_by_col=>session[:sort_by_col]) 
     end
   end
 
