@@ -7,30 +7,39 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @movies = Movie.all
     @all_ratings = Movie.all_ratings
+    @ratings_to_show = @all_ratings
+    selection = nil 
     if params[:ratings]
-      @ratings_to_show = params[:ratings].keys
-      session[:ratings] = params[:ratings]
-    elsif session[:ratings]
-      @ratings_to_show = session[:ratings].keys
-    else
-      @ratings_to_show = @all_ratings
+      selection = params[:ratings].keys
+      session[:ratings] = selection
+      session[:full_ratings] = params[:ratings]
+      @ratings_to_show = selection
     end
-    if params[:sort_by_col]
-      @movies = Movie.with_ratings(@ratings_to_show).order(params[:sort_by_col])
-      session[:sort_by_col] = params[:sort_by_col]
+    if params.has_key?(:ratings_to_show)
+      session[:ratings] = params[:ratings_to_show]
+    end 
+    @ratings_to_show = session[:ratings]
+    session[:sort_by_col] = params[:sort_by_col] if params.has_key?(:sort_by_col)
+
+    if session[:sort_by_col]
       if session[:sort_by_col] == 'title'
         @title_header = 'hilite bg-warning'
       elsif session[:sort_by_col] == 'release_date'
         @release_header = 'hilite bg-warning'
       end
-    elsif session[:sort_by_col]
-      @movies = Movie.with_ratings(@ratings_to_show).order(session[:sort_by_col])
-    else
-      @movies = Movie.with_ratings(@ratings_to_show)
     end
-    if params[:ratings] != session[:ratings] or params[:sort_by_col] != session[:sort_by_col]
-      redirect_to movies_path(:ratings=>session[:ratings],:sort_by_col=>session[:sort_by_col]) 
+    @movies = Movie.with_ratings(session[:sort_by_col],@ratings_to_show)
+
+    if not params[:ratings] and not params[:sort_by_col]
+      if (session[:full_ratings]) and (not session[:sort_by_col])
+        redirect_to movies_path(:ratings=>session[:full_ratings])
+      elsif (not session[:full_ratings]) and (session[:sort_by_col])
+        redirect_to movies_path(:sort_by_col=>session[:sort_by_col])
+      elsif session[:full_ratings] and session[:sort_by_col]
+        redirect_to movies_path(:ratings=>session[:full_ratings],:sort_by_col=>session[:sort_by_col])
+      end
     end
   end
 
