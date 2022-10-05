@@ -7,7 +7,22 @@ class MoviesController < ApplicationController
   end
 
   def index
+    if $cnt == 1 
+      session.clear 
+      $cnt += 1
+    end
     @movies = Movie.all
+    @all_ratings = Movie.all_ratings
+    @ratings_to_show = @all_ratings
+    selected_boxes = [] 
+    if params[:ratings]
+      selected_boxes = params[:ratings].keys
+      session[:ratings] = selected_boxes
+      session[:full_ratings] = params[:ratings]
+      @ratings_to_show = selected_boxes
+    end
+    @movies = Movie.with_ratings(selected_boxes)
+    
   end
 
   def new
