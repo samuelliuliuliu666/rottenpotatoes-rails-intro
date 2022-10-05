@@ -7,22 +7,26 @@ class MoviesController < ApplicationController
   end
 
   def index
-    if $cnt == 1 
-      session.clear 
-      $cnt += 1
-    end
-    @movies = Movie.all
     @all_ratings = Movie.all_ratings
-    @ratings_to_show = @all_ratings
-    selected_boxes = [] 
     if params[:ratings]
-      selected_boxes = params[:ratings].keys
-      session[:ratings] = selected_boxes
-      session[:full_ratings] = params[:ratings]
-      @ratings_to_show = selected_boxes
+      @ratings_to_show = params[:ratings].keys
+      session[:ratings] = params[:ratings]
+    elsif session[:ratings]
+      @ratings_to_show = session[:ratings].keys
+    else
+      @ratings_to_show = @all_ratings
     end
-    @movies = Movie.with_ratings(selected_boxes)
-    
+    if params[:sort]
+      @movies = Movie.with_ratings(@ratings_to_show).order(params[:sort])
+      session[:sort] = params[:sort]
+    elsif session[:sort]
+      @movies = Movie.with_ratings(@ratings_to_show).order(session[:sort])
+    else
+      @movies = Movie.with_ratings(@ratings_to_show)
+    end
+    if params[:ratings] != session[:ratings] or params[:sort] != session[:sort]
+      redirect_to movies_path ratings: session[:ratings], sort: session[:sort] 
+    end
   end
 
   def new

@@ -13,12 +13,15 @@
   <%= submit_tag 'Refresh', id: 'ratings_submit', class: 'btn btn-primary' %>
 <% end %>
 
+
 <table class="table table-striped col-md-12" id="movies">
   <thead>
     <tr>
-      <th>Movie Title</th>
+      <th class="<%= 'hilite bg-warning' if params[:sort] == 'title' %>">
+        <%= link_to 'Movie Title', movies_path(:sort => 'title', :ratings => @ratings_to_show.each_with_object({}) { |k, h| h[k] = 1 }), id: "title_header" %></th>
       <th>Rating</th>
-      <th>Release Date</th>
+      <th class="<%= 'hilite bg-warning' if params[:sort] == 'release_date' %>">
+        <%= link_to 'Release Date', movies_path(:sort => 'release_date', :ratings => @ratings_to_show.each_with_object({}) { |k, h| h[k] = 1 }), id: "release_date_header" %></th>
       <th>More Info</th>
     </tr>
   </thead>
